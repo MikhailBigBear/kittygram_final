@@ -1,0 +1,115 @@
+name: Kittygram
+
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install flake8
+
+      - name: Check PEP8 compliance
+        run: |
+          flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+
+      - name: Run backend tests
+        run: |
+          python -m pytest tests/
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm install
+          npm test
+
+  build-and-push:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.USERNAME }}/kittygram_backend:latest
+
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.USERNAME }}/kittygram_frontend:latest
+
+      - name: Build and push gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nginx
+          file: ./nginx/Dockerfile
+          push: true
+          tags: ${{ secrets.USERNAME }}/kittygram_gateway:latest
+
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd kittygram_final
+
+            git pull origin main
+
+            docker-compose run --rm backend python manage.py collectstatic --no-input
+
+            docker-compose run --rm backend python manage.py migrate
+
+            docker-compose pull
+            docker-compose up -d
+
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            ✅ Деплой Kittygram успешно завершён!
+            Ветку: main
+            Время: $(date +"%Y-%m-%d %H:%M:%S")
