@@ -44,7 +44,7 @@ pip install -r requirements.txt
 python3 manage.py migrate
 ```
 
-Запустить проект:
+Запустить проект так:
 
 ```
 python3 manage.py runserver
