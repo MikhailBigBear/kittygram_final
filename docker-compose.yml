@@ -1,8 +1,8 @@
 version: '3'
 
 networks:
-  app-network:
-    driver: bridge
+  default:
+    name: kittygram_final_default
 
 volumes:
   pg_data:
@@ -14,13 +14,13 @@ services:
     image: postgres:13
     env_file: .env
     networks:
-      - app-network
+      - default
     volumes:
       - pg_data:/var/lib/postgresql/data
     restart: always
   backend:
     networks:
-      - app-network
+      - default
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/health/"]
       interval: 30s
@@ -28,8 +28,6 @@ services:
       retries: 3
       start_period: 40s
     build: ./backend/
-    ports:
-      - 8000:9000
     env_file: .env
     volumes:
       - static:/app/static
@@ -37,11 +35,13 @@ services:
     depends_on:
       - db
     restart: always
+    ports:
+      - 9000:9000
   frontend:
     env_file: .env
     build: ./frontend/
     networks:
-      - app-network
+      - default
     volumes:
       - static:/app/static
     command: >
@@ -51,7 +51,7 @@ services:
     build: ./nginx/
     env_file: .env
     networks:
-      - app-network
+      - default
     ports:
       - 80:80
       - 443:443
