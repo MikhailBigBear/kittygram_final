@@ -28,6 +28,8 @@ services:
       retries: 3
       start_period: 40s
     build: ./backend/
+    ports:
+      - 8000:9000
     env_file: .env
     volumes:
       - static:/app/static
@@ -38,12 +40,13 @@ services:
   frontend:
     env_file: .env
     build: ./frontend/
-    command: sh -c "mkdir -p /static && cp -r /app/build/. /static/"
     networks:
       - app-network
     volumes:
-      - static:/usr/share/nginx/html/static
-    restart: always
+      - static:/app/static
+    command: >
+      sh -c "npm run build && cp -r /app/build/. /app/static/"
+    restart: unless-stopped
   gateway:
     build: ./nginx/
     env_file: .env
