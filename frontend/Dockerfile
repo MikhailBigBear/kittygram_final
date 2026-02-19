@@ -9,3 +9,5 @@ RUN npm ci
 COPY . .
 RUN npm install --global server
 RUN npm run build
+
+CMD ["serve", "-s", "build"]
