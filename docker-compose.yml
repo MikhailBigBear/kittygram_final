@@ -36,8 +36,6 @@ services:
     depends_on:
       - db
     restart: always
-    expose:
-      - 9000
   frontend:
     env_file: .env
     build: ./frontend/
