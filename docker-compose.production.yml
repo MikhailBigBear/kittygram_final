@@ -17,8 +17,8 @@ services:
     image: mikhailbigbear/kittygram_backend
     env_file: .env
     volumes:
-      - static:/app/static
-      - media:/app/media
+      - static:/static
+      - media:/media
     depends_on:
       - db
     restart: always
@@ -26,16 +26,16 @@ services:
   frontend:
     image: mikhailbigbear/kittygram_frontend
     env_file: .env
-    command: cp -r /app/build/. /static/
+    command: sh -c "cp -r /app/build/. /static/"
     volumes:
-      - static:/usr/share/nginx/html/static
+      - static:/static
     restart: always
 
   gateway:
     image: mikhailbigbear/kittygram_gateway
     env_file: .env
     ports:
-      - 9000:80
+      - 8080:80
     volumes:
       - static:/static
       - media:/media
