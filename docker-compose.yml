@@ -43,8 +43,7 @@ services:
       - app-network
     volumes:
       - static:/static
-    command: >
-      sh -c "npm run build && cp -r /app/build/. /static/"
+    command: cp -r /app/build/. /static/
     restart: unless-stopped
   gateway:
     build: ./nginx/
