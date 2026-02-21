@@ -13,7 +13,7 @@ ALLOWED_HOSTS = [
     "130.193.45.160",
     "127.0.0.1",
     "kittygramchick-demo.ru",
-    "mikhailbigbear.hopto.org",
+    # "mikhailbigbear.hopto.org",
     "backend",
 ]
 
@@ -103,7 +103,7 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-STATIC_ROOT = "/static"
+STATIC_ROOT = BASE_DIR / "static"
 
 
 MEDIA_URL = "/media/"

@@ -10,4 +10,4 @@ COPY . .
 RUN npm install --global server
 RUN npm run build
 
-CMD ["serve", "-s", "build"]
+CMD ["npx", "-y", "http-server", "-p", "9000", "/app/build"]
