@@ -81,7 +81,14 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: 🔍 Диагностика
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start Docker daemon
+        run: |
+          sudo systemctl start docker
+          sudo systemctl status docker
+      - name: Диагностика
         run: |
           which docker
           docker --version
@@ -89,7 +96,7 @@ jobs:
           env | grep -i docker
           echo "$PATH"
 
-      - name: ⚙️ Исправление окружения
+      - name: Исправление окружения
         run: |
           unset DOCKER_API_VERSION
           sudo apt-get remove -y docker-cli docker.io || true
@@ -102,7 +109,11 @@ jobs:
           sudo apt-get install -y docker-ce-cli
           docker --version
           docker version --format '{{.Client.APIVersion}}'
-
+      - name: Verify Docker version
+        run: |
+          docker --version
+          docker version
+          docker info
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.1.0
         with:
