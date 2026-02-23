@@ -79,10 +79,10 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Deploy to server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -98,7 +98,6 @@ jobs:
 
             docker-compose pull
             docker-compose up -d
-
 
   notify:
     needs: deploy
