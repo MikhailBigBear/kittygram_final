@@ -79,7 +79,7 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.1.0
